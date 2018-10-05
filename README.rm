@@ -1,0 +1,24 @@
+flickr_uploader is script for uploading photos and videos to flickr. 
+
+
+It was created, because I couldn't find any software which fit for me. 
+It sets the "date taken" property for all medias, including videos. 
+(flickr sets it only if the file has the right exif data, otherwise sets the uploading time to the date taken time.)
+
+
+
+Besause anybody can change the code of this product, the user need to ask his own api_key api_secret from flickr (it means it needs to be registered.) Then the user needs to type them into flickr_uploader.py otherwise she will get an error message.
+
+Requirements:
+  
+	- Python 3.6
+ 
+	- python flickrapi
+	- kivy
+	- PIL
+	- ffpyplayer
+
+There are two ways for using flickr_uploader:
+1. from consol: python main_consol.py -album your_album_name - folder folder_path_of_photos
+
+2. use gui: python main.py
