@@ -1,0 +1,230 @@
+#:kivy 1.10.1
+
+<Header@BoxLayout>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 0.45,0.45,0.45,1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            Color:
+                rgba: 0.5,0.5,0.5,0
+    size_hint_y: None
+    height: int(app.button_height * 1.5)
+    padding: int(app.button_height / 4)
+
+<MessageDisplayer>:
+    title: 'Uploading...'
+    id: message
+    auto_dismiss: False
+    size_hint: (None, None)
+    size: (500, 400)
+    BoxLayout:
+        orientation: 'vertical'
+        TextInput:
+            id: message
+            focus: False
+            multiline: True
+            readonly: True
+            size_hint_y: None
+            height: int(app.button_height * 6)
+        Button:
+            text: 'OK'
+            id: ok_btn
+            on_release: root.dispatch('on_close', 'OK')
+            diasabled: True
+            size_hint: (None, None)
+            height: app.button_height
+
+<AlbumPopup>:
+    title: 'New Album'
+    auto_dismiss: False
+    size_hint: (None, None)
+    size: (350, app.button_height * 5)
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: (None, None)
+        height: int(app.button_height * 4)
+        padding: int(app.button_height / 4)
+        BoxLayout:
+            orientation: 'horizontal'        
+            size_hint: (None, None)
+            height: int(app.button_height * 1.5)
+            padding: int(app.button_height / 4)
+            Label:
+                text: "Album name: "
+                size_hint: (None, None)
+                height: app.button_height
+            TextInput:
+                id: albumname
+                text: ""
+                multiline: False
+                focus: True
+                size_hint: (None, None)
+                height: app.button_height
+                width: app.button_height * 4
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: int(app.button_height * 1.5)
+            padding: int(app.button_height / 4)
+            Button:
+                text: "OK"
+                on_release: root.dispatch('on_close', 'OK')
+                size_hint: (None, None)
+                height: app.button_height
+            Button:
+                text: "Cancel"
+                on_release: root.dispatch('on_close', 'Cancel')
+                size_hint: (None, None)
+                height: app.button_height
+
+<PhotoImage>:
+    keep_ratio: True
+    allow_stretch: True
+    canvas.before:
+        Color:
+            rgba: (0.2, 0.43, .71, 1) if self.parent.selected else (0, 0, 0, 0)
+        Rectangle:
+            size: self.norm_image_size[0] + 8, self.norm_image_size[1] + 8
+            pos: self.x + int((self.width - self.norm_image_size[0])/2) -4, self.y -4
+        #adjust the image to the bottom of the canvas
+        PushMatrix
+        Translate:
+            y: - int((self.size[1] - self.norm_image_size[1]) / 2)
+    canvas.after:
+        PopMatrix
+        Color:
+            rgba: (1, 1, 1, 1) if not self.parent.selectable else (1, 0, 0, 0)
+        Rectangle:
+            source: 'img/uploaded.png'
+            pos: self.x + int((self.width - self.norm_image_size[0])/2), self.y
+            size: 20, 20
+        Color:
+            rgba: (1, 1, 1, 1) if self.parent.is_video else (1, 0, 0, 0)
+        Rectangle:
+            source: 'img/video.png'
+            pos: self.x + int((self.width + self.norm_image_size[0])/2) - 25, self.y
+            size: 25, 20
+
+<SelectableImage>:
+    orientation: 'vertical'
+    padding: 2
+    spacing: 2
+    size_hint: (None, None)
+    PhotoImage:
+        id: async_photo
+    Label:
+        id: name
+        text: root.title if len(root.title) < 20 else (root.title[0:14] + '...' + root.title[-4:])
+        text_size: self.width, self.height
+        halign: 'center'
+        size_hint: (None, None)
+        width: root.width
+        height: int(app.button_height * 0.55)
+
+<SelectableRecycleGridLayout>:
+    orientation: 'vertical'
+    cols: int(self.width / 230)
+    default_size: None, dp(230)
+    default_size_hint: 1, None
+    size_hint_y: None
+    height: self.minimum_height
+    multiselect: True
+    touch_multiselect: True
+    spacing: 10
+    padding: 20
+
+<MainScreen>:
+    canvas.before:
+        Color:
+            rgba: 0,0,0,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    id: mainScreen
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 5
+        FileChooserListView:
+            id: filechooser
+            canvas.before:
+                Color:
+                    rgba: 0.25,0.25,0.25,1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            multiselect: False
+            dirselect: True
+            filters: ['root.is_dir']
+            size_hint_x: None
+            width: 250
+            border: (5,5,5,5)
+            on_selection: root.set_path(self.selection[0])
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 5
+            canvas.before:
+                Color:
+                    rgba: 0.25,0.25,0.25,1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Header:
+                Label:
+                    text: "Choose photos for album: " + root.flickr_album if root.flickr_album else "Choose album and photos"
+                Button:
+                    text: "Upload"
+                    size_hint: (None, None)
+                    height: app.button_height
+                    width: app.button_height * 3
+                    on_press: root.upload()
+                Label:
+                    text: "Sort by: "
+                    size_hint: (None, None)
+                    height: app.button_height
+                    width: app.button_height * 3
+                    text_size: self.size
+                    halign: 'right'
+                    valign: 'middle'
+                Spinner:
+                    text : root.sorted_mode
+                    values: root.sorting_modes
+                    size_hint: (None, None)
+                    height: app.button_height
+                    width: 220
+                    #text_update: True
+                    on_text: root.sort_data(self.text)
+            Header:
+                orientation: 'horizontal'
+                disabled: True if root.flickr_album else False
+                opacity: 0 if root.flickr_album else 1
+                size_hint_y: None
+                height: int(app.button_height * 1.5) if not root.flickr_album else 0
+                padding: int(app.button_height / 4)
+                spacing: int(app.button_height / 2)
+                Label:
+                    text: 'Select album:'
+                    size_hint: (None, None)
+                    height: app.button_height
+                Spinner:
+                    id: albums
+                    values: root.albums
+                    text: root.albums[0] if root.albums else ""
+                    text_update: True
+                    opacity: 1 if self.values else 0
+                    disabled: True if not self.values else False
+                    size_hint: (None, None)
+                    height: app.button_height
+                    width: '200dp'
+                Button:
+                    text: 'New album'
+                    size_hint: (None, None)
+                    height: app.button_height
+                    on_press: root.add_album()
+            RecyclePhotoView:
+                id: photos_cont
+                viewclass: 'SelectableImage'
+                SelectableRecycleGridLayout:
+                    id: photos
